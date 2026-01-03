@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <title>Data Converter</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f7f7f7;
+    }
+    textarea {
+      width: 100%;
+      min-height: 180px;
+      padding: 10px;
+      font-family: monospace;
+      margin-bottom: 10px;
+    }
+    button {
+      padding: 10px 16px;
+      margin-right: 8px;
+      cursor: pointer;
+    }
+    #output {
+      white-space: pre-wrap;
+      background: #fff;
+      border: 1px solid #ccc;
+      padding: 10px;
+      min-height: 200px;
+    }
+  </style>
+</head>
+<body>
+
+  <h3>Input Data</h3>
+  <textarea id="input" placeholder="Paste data dari Excel / Google Sheets di sini"></textarea>
+
+  <button onclick="convertData()">CONVERT</button>
+  <button onclick="copyOutput()">COPY SEMUA OUTPUT</button>
+
+  <h3>Hasil</h3>
+  <div id="output"></div>
+
+  <script>
+    function normalizeSaldo(saldo) {
+      saldo = saldo.trim();
+      // Jika pakai kurung → minus
+      if (saldo.startsWith("(") && saldo.endsWith(")")) {
+        saldo = "-" + saldo.slice(1, -1);
+      }
+      return saldo;
+    }
+
+    function convertData() {
+      const input = document.getElementById("input").value.trim();
+      const outputDiv = document.getElementById("output");
+
+      if (!input) {
+        outputDiv.textContent = "";
+        return;
+      }
+
+      const lines = input.split(/\r?\n/);
+
+      // HEADER INFO (muncul sekali)
+      let result =
+`Info : HOKIJITU
+Perihal : Follow Up Rekening Bank Off / Bermasalah
+
+`;
+
+      lines.forEach(line => {
+        if (!line.trim()) return;
+
+        const cols = line.split("\t");
+        if (cols.length < 5) return;
+
+        const jenisBank = cols[0].trim();
+        const nomorRekening = cols[1].trim();
+        const nama = cols[2].trim();
+        const saldo = normalizeSaldo(cols[3]);
+        const keterangan = cols[4].trim();
+
+        result +=
+`Jenis Bank  : ${jenisBank}
+Nama Rekening  : ${nama}
+Nomor Rekening  : ${nomorRekening}
+Saldo ahkir   : Rp: ${saldo}
+Keterangan : ${keterangan}
+------------------------------
+`;
+      });
+
+      outputDiv.textContent = result.trim();
+    }
+
+    function copyOutput() {
+      const text = document.getElementById("output").textContent;
+      if (!text) return;
+
+      navigator.clipboard.writeText(text).then(() => {
+        alert("Output berhasil disalin");
+      });
+    }
+  </script>
+
+</body>
+</html>
